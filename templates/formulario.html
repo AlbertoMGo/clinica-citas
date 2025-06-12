@@ -4,67 +4,70 @@
     <meta charset="UTF-8">
     <title>Agendar Cita</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    <script>
-        const medicos = {{ medicos | tojson }};
-    </script>
-    <script src="{{ url_for('static', filename='formulario.js') }}" defer></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 <body>
-    <h1>Agendar Cita</h1>
+    <div class="form-container">
+        <h2>Agendar una cita</h2>
+        <form id="formularioCita" method="POST" action="/agendar">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="nombre">Nombre completo:</label>
+                    <input type="text" id="nombre" name="nombre" required>
+                </div>
+                <div class="form-group">
+                    <label for="correo">Correo electrónico:</label>
+                    <input type="email" id="correo" name="correo" required>
+                </div>
+            </div>
 
-    {% with messages = get_flashed_messages(with_categories=true) %}
-      {% if messages %}
-        <ul class="flashes">
-          {% for category, message in messages %}
-            <li class="{{ category }}">{{ message }}</li>
-          {% endfor %}
-        </ul>
-      {% endif %}
-    {% endwith %}
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="telefono">Número telefónico:</label>
+                    <input type="tel" id="telefono" name="telefono" pattern="[0-9]{10}" required>
+                </div>
+                <div class="form-group">
+                    <label for="sucursal">Sucursal:</label>
+                    <select id="sucursal" name="sucursal" required>
+                        <option value="" disabled selected>Selecciona una sucursal</option>
+                        <option value="Centro">Centro</option>
+                        <option value="Norte">Norte</option>
+                        <option value="Sur">Sur</option>
+                    </select>
+                </div>
+            </div>
 
-    <form method="post" action="{{ url_for('submit') }}" id="formulario">
-        <div class="form-row">
-            <div>
-                <label for="nombre">Nombre completo:</label>
-                <input type="text" id="nombre" name="nombre" required>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="tipo">Tipo de atención:</label>
+                    <select id="tipo" name="tipo" required>
+                        <option value="" disabled selected>Selecciona un tipo de atención</option>
+                        <option value="Psicológica">Psicológica</option>
+                        <option value="Médica">Médica</option>
+                        <option value="Odontológica">Odontológica</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="medico">Médico o Profesional de la salud:</label>
+                    <select id="medico" name="medico" required>
+                        <option value="" disabled selected>Selecciona un profesional</option>
+                    </select>
+                </div>
             </div>
-            <div>
-                <label for="correo">Correo electrónico:</label>
-                <input type="email" id="correo" name="correo" required>
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div>
-                <label for="telefono">Número telefónico:</label>
-                <input type="tel" id="telefono" name="telefono" required>
+            <div class="form-row">
+                <div class="form-group solo">
+                    <label for="fecha_hora">Fecha y hora:</label>
+                    <input type="datetime-local" id="fecha_hora" name="fecha_hora" required>
+                </div>
             </div>
-            <div>
-                <label for="sucursal">Sucursal:</label>
-                <select id="sucursal" name="sucursal" required></select>
-            </div>
-        </div>
 
-        <div class="form-row">
-            <div>
-                <label for="tipo">Tipo de atención:</label>
-                <select id="tipo" name="tipo" required></select>
+            <div class="form-actions">
+                <button type="submit" id="submitBtn" disabled>Agendar Cita</button>
             </div>
-            <div>
-                <label for="medico">Médico o Profesional de la salud:</label>
-                <select id="medico" name="medico" required></select>
-            </div>
-        </div>
+        </form>
+    </div>
 
-        <div class="form-row">
-            <div>
-                <label for="fecha_hora">Fecha y hora:</label>
-                <select id="fecha_hora" name="fecha_hora" required></select>
-            </div>
-            <div>
-                <button type="submit" id="enviar" disabled>Agendar</button>
-            </div>
-        </div>
-    </form>
+    <script src="{{ url_for('static', filename='formulario.js') }}"></script>
 </body>
 </html>

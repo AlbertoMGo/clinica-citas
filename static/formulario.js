@@ -1,73 +1,94 @@
-document.addEventListener("DOMContentLoaded", function () {
-    const sucursalSelect = document.getElementById("sucursal");
-    const tipoSelect = document.getElementById("tipo");
-    const medicoSelect = document.getElementById("medico");
-    const fechaHoraSelect = document.getElementById("fecha_hora");
-    const form = document.getElementById("formulario");
-    const enviarBtn = document.getElementById("enviar");
+document.addEventListener('DOMContentLoaded', function () {
+    const sucursalSelect = document.getElementById('sucursal');
+    const tipoSelect = document.getElementById('tipo');
+    const medicoSelect = document.getElementById('medico');
+    const fechaHoraInput = document.getElementById('fecha_hora');
+    const submitBtn = document.getElementById('submitBtn');
+    const form = document.getElementById('formularioCita');
 
-    // Cargar sucursales y tipos
-    const sucursales = [...new Set(medicos.map(m => m.sucursal))];
-    sucursales.forEach(s => {
-        const option = new Option(s, s);
-        sucursalSelect.appendChild(option);
-    });
+    const medicos = {
+        Centro: {
+            Psicológica: ['Dra. Ana Morales', 'Dr. Luis Sánchez'],
+            Médica: ['Dra. Teresa Gómez', 'Dr. Juan Pérez'],
+            Odontológica: ['Dra. Clara Torres', 'Dr. Emilio Díaz']
+        },
+        Norte: {
+            Psicológica: ['Dra. Carolina Ruiz', 'Dr. Marco Hernández'],
+            Médica: ['Dra. Gabriela Márquez', 'Dr. Rafael Estrada'],
+            Odontológica: ['Dra. Andrea León', 'Dr. Tomás Fuentes']
+        },
+        Sur: {
+            Psicológica: ['Dra. Isabel Rivas', 'Dr. Pablo Quintana'],
+            Médica: ['Dra. Fernanda Soto', 'Dr. Miguel Ortega'],
+            Odontológica: ['Dra. Patricia Flores', 'Dr. Andrés Velasco']
+        }
+    };
 
-    const tipos = [...new Set(medicos.map(m => m.tipo))];
-    tipos.forEach(t => {
-        const option = new Option(t, t);
-        tipoSelect.appendChild(option);
-    });
+    function actualizarMedicos() {
+        const sucursal = sucursalSelect.value;
+        const tipo = tipoSelect.value;
+        medicoSelect.innerHTML = '<option value="" disabled selected>Selecciona un profesional</option>';
 
-    function cargarMedicos() {
-        medicoSelect.innerHTML = "";
-        const filtro = medicos.filter(m =>
-            m.sucursal === sucursalSelect.value && m.tipo === tipoSelect.value
-        );
-        filtro.forEach(m => {
-            const option = new Option(m.nombre, m.nombre);
-            medicoSelect.appendChild(option);
-        });
-        cargarHorarios();
-    }
-
-    async function cargarHorarios() {
-        fechaHoraSelect.innerHTML = "";
-        const hoy = new Date();
-        const dia = hoy.toISOString().split("T")[0];
-
-        for (let hora = 7; hora < 20; hora++) {
-            for (let min of [0, 30]) {
-                const fecha = new Date();
-                fecha.setHours(hora, min, 0, 0);
-
-                if (fecha < new Date(Date.now() + 60 * 60 * 1000)) continue;
-
-                const fechaISO = fecha.toISOString().slice(0, 16);
-                const fechaTexto = fecha.toLocaleTimeString([], {
-                    hour: "2-digit",
-                    minute: "2-digit",
-                });
-
-                const disponible = await fetch(`/verificar_horario?medico=${medicoSelect.value}&fecha_hora=${fechaISO}`)
-                    .then(res => res.json());
-
-                if (disponible.disponible) {
-                    const option = new Option(`${dia} ${fechaTexto}`, fechaISO);
-                    fechaHoraSelect.appendChild(option);
-                }
-            }
+        if (sucursal && tipo && medicos[sucursal] && medicos[sucursal][tipo]) {
+            medicos[sucursal][tipo].forEach(function (medico) {
+                const option = document.createElement('option');
+                option.value = medico;
+                option.textContent = medico;
+                medicoSelect.appendChild(option);
+            });
         }
     }
 
-    sucursalSelect.addEventListener("change", cargarMedicos);
-    tipoSelect.addEventListener("change", cargarMedicos);
-    medicoSelect.addEventListener("change", cargarHorarios);
+    sucursalSelect.addEventListener('change', actualizarMedicos);
+    tipoSelect.addEventListener('change', actualizarMedicos);
 
-    // Activar botón solo si todos los campos están llenos
-    form.addEventListener("input", function () {
-        const inputs = form.querySelectorAll("input, select");
-        const todosLlenos = Array.from(inputs).every(i => i.value.trim() !== "");
-        enviarBtn.disabled = !todosLlenos;
+    function validarFormulario() {
+        const nombre = document.getElementById('nombre').value.trim();
+        const correo = document.getElementById('correo').value.trim();
+        const telefono = document.getElementById('telefono').value.trim();
+        const sucursal = sucursalSelect.value;
+        const tipo = tipoSelect.value;
+        const medico = medicoSelect.value;
+        const fechaHora = fechaHoraInput.value;
+
+        const ahora = new Date();
+        const fechaSeleccionada = new Date(fechaHora);
+
+        const diferenciaMinutos = (fechaSeleccionada - ahora) / (1000 * 60);
+
+        if (
+            nombre && correo && telefono && sucursal &&
+            tipo && medico && fechaHora &&
+            diferenciaMinutos >= 60
+        ) {
+            submitBtn.disabled = false;
+        } else {
+            submitBtn.disabled = true;
+        }
+    }
+
+    document.querySelectorAll('input, select').forEach(el => {
+        el.addEventListener('input', validarFormulario);
+        el.addEventListener('change', validarFormulario);
+    });
+
+    // Validación en envío para prevenir duplicados
+    form.addEventListener('submit', async function (e) {
+        e.preventDefault();
+
+        const formData = new FormData(form);
+
+        const response = await fetch('/verificar_cita', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (data.existe) {
+            alert('Ya existe una cita con esos datos. Por favor elige otro horario.');
+        } else {
+            form.submit();
+        }
     });
 });
