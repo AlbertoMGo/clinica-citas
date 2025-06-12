@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Agenda de Citas</title>
+  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/main.min.css' rel='stylesheet' />
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/main.min.js'></script>
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/locales/es.js"></script>
+</head>
+<body>
+  <div class="container">
+    <h1>Agenda de Citas</h1>
+    <div id='calendar'></div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const calendarEl = document.getElementById('calendar');
+      const calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        locale: 'es',
+        headerToolbar: {
+          left: 'prev,next today',
+          center: 'title',
+          right: 'dayGridMonth,timeGridWeek,timeGridDay'
+        },
+        events: {{ eventos | tojson | safe }}
+      });
+      calendar.render();
+    });
+  </script>
+</body>
+</html>
