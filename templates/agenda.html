@@ -1,34 +1,66 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Agenda de Citas</title>
-  <link href='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/main.min.css' rel='stylesheet' />
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/main.min.js'></script>
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.4/locales/es.js"></script>
+    <meta charset="UTF-8">
+    <title>Agenda de Citas</title>
+    <link href="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js"></script>
 </head>
 <body>
-  <div class="container">
     <h1>Agenda de Citas</h1>
-    <div id='calendar'></div>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', function () {
-      const calendarEl = document.getElementById('calendar');
-      const calendar = new FullCalendar.Calendar(calendarEl, {
-        initialView: 'dayGridMonth',
-        locale: 'es',
-        headerToolbar: {
-          left: 'prev,next today',
-          center: 'title',
-          right: 'dayGridMonth,timeGridWeek,timeGridDay'
-        },
-        events: {{ eventos | tojson | safe }}
-      });
-      calendar.render();
-    });
-  </script>
+    <div class="filtros">
+        <label for="filtroSucursal">Sucursal:</label>
+        <select id="filtroSucursal">
+            <option value="">Todas</option>
+            <option value="Centro">Centro</option>
+            <option value="Norte">Norte</option>
+            <option value="Sur">Sur</option>
+        </select>
+
+        <label for="filtroTipo">Tipo de Atención:</label>
+        <select id="filtroTipo">
+            <option value="">Todas</option>
+            <option value="Psicológica">Psicológica</option>
+            <option value="Médica">Médica</option>
+            <option value="Odontológica">Odontológica</option>
+        </select>
+    </div>
+
+    <div id="calendar"></div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const eventos = {{ eventos | tojson }};
+            const calendarEl = document.getElementById('calendar');
+
+            const calendar = new FullCalendar.Calendar(calendarEl, {
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                height: "auto",
+                events: eventos
+            });
+
+            calendar.render();
+
+            document.getElementById('filtroSucursal').addEventListener('change', filtrarEventos);
+            document.getElementById('filtroTipo').addEventListener('change', filtrarEventos);
+
+            function filtrarEventos() {
+                const sucursal = document.getElementById('filtroSucursal').value;
+                const tipo = document.getElementById('filtroTipo').value;
+
+                const eventosFiltrados = eventos.filter(evento => {
+                    const matchSucursal = !sucursal || evento.extendedProps.sucursal === sucursal;
+                    const matchTipo = !tipo || evento.extendedProps.tipo === tipo;
+                    return matchSucursal && matchTipo;
+                });
+
+                calendar.removeAllEvents();
+                eventosFiltrados.forEach(evento => calendar.addEvent(evento));
+            }
+        });
+    </script>
 </body>
 </html>

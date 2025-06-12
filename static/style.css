@@ -1,87 +1,141 @@
 body {
-  font-family: 'Segoe UI', sans-serif;
-  background: #f8fafc;
-  margin: 0;
-  padding: 20px;
-}
-
-.container {
-  max-width: 900px;
-  margin: auto;
-  background: #ffffff;
-  padding: 30px;
-  border-radius: 8px;
-  box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f4f8f9;
+    color: #333;
+    margin: 0;
+    padding: 20px;
 }
 
 h1 {
-  text-align: center;
-  color: #1f4e79;
+    color: #007B8A;
+    text-align: center;
+    margin-bottom: 30px;
 }
 
 form {
-  margin-top: 20px;
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: #ffffff;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
+.form-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    gap: 20px;
 }
 
-.form-group {
-  flex: 1 1 45%;
-  margin-bottom: 20px;
+.form-row > div {
+    flex: 1;
+    min-width: 250px;
+    display: flex;
+    flex-direction: column;
 }
 
-.form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: bold;
+label {
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #444;
 }
 
 input, select {
-  width: 100%;
-  padding: 10px;
-  border: 1px solid #ccc;
-  border-radius: 5px;
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    transition: border 0.2s;
+}
+
+input:focus, select:focus {
+    border-color: #007B8A;
+    outline: none;
 }
 
 button {
-  width: 100%;
-  padding: 12px;
-  background-color: #1f4e79;
-  color: #fff;
-  font-size: 16px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
+    padding: 12px 20px;
+    font-size: 1rem;
+    color: white;
+    background-color: #007B8A;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    margin-top: 30px;
+    transition: background-color 0.3s;
 }
 
 button:disabled {
-  background-color: #ccc;
-  cursor: not-allowed;
+    background-color: #b0cfd2;
+    cursor: not-allowed;
 }
 
-.flash {
-  padding: 12px;
-  margin-bottom: 20px;
-  border-radius: 4px;
-  font-weight: bold;
+button:hover:not(:disabled) {
+    background-color: #005f6b;
 }
 
-.flash.success {
-  background-color: #d4edda;
-  color: #155724;
+.flashes {
+    list-style: none;
+    padding: 0;
+    text-align: center;
+    margin-bottom: 20px;
 }
 
-.flash.error {
-  background-color: #f8d7da;
-  color: #721c24;
+.flashes li {
+    padding: 10px;
+    margin: 10px auto;
+    border-radius: 8px;
+    max-width: 500px;
+    color: white;
 }
 
-@media (max-width: 600px) {
-  .form-group {
-    flex: 1 1 100%;
-  }
+.flashes .success {
+    background-color: #28a745;
+}
+
+.flashes .error {
+    background-color: #dc3545;
+}
+
+/* Agenda calendar */
+#calendar {
+    max-width: 900px;
+    margin: 0 auto;
+    background-color: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.filtros {
+    max-width: 900px;
+    margin: 0 auto 20px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+.filtros label {
+    font-weight: 600;
+}
+
+.filtros select {
+    padding: 8px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+}
+
+/* Responsive design */
+@media screen and (max-width: 600px) {
+    .form-row {
+        flex-direction: column;
+    }
+
+    .filtros {
+        flex-direction: column;
+        align-items: center;
+    }
 }

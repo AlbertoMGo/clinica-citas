@@ -1,130 +1,70 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <title>Agendar Cita</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta charset="UTF-8">
+    <title>Agendar Cita</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script>
+        const medicos = {{ medicos | tojson }};
+    </script>
+    <script src="{{ url_for('static', filename='formulario.js') }}" defer></script>
 </head>
 <body>
-  <div class="container">
     <h1>Agendar Cita</h1>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
       {% if messages %}
-        {% for category, message in messages %}
-          <div class="flash {{ category }}">{{ message }}</div>
-        {% endfor %}
+        <ul class="flashes">
+          {% for category, message in messages %}
+            <li class="{{ category }}">{{ message }}</li>
+          {% endfor %}
+        </ul>
       {% endif %}
     {% endwith %}
 
-    <form action="{{ url_for('agendar') }}" method="POST" id="form-cita">
-      <div class="row">
-        <div class="form-group">
-          <label for="nombre">Nombre del Paciente</label>
-          <input type="text" id="nombre" name="nombre" required>
+    <form method="post" action="{{ url_for('submit') }}" id="formulario">
+        <div class="form-row">
+            <div>
+                <label for="nombre">Nombre completo:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+            <div>
+                <label for="correo">Correo electrónico:</label>
+                <input type="email" id="correo" name="correo" required>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label for="sucursal">Sucursal</label>
-          <select id="sucursal" name="sucursal" required>
-            <option value="">Seleccionar</option>
-            {% for s in sucursales %}
-              <option value="{{ s }}">{{ s }}</option>
-            {% endfor %}
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label for="tipo">Tipo de Atención</label>
-          <select id="tipo" name="tipo" required>
-            <option value="">Seleccionar</option>
-            {% for t in tipos %}
-              <option value="{{ t }}">{{ t }}</option>
-            {% endfor %}
-          </select>
+        <div class="form-row">
+            <div>
+                <label for="telefono">Número telefónico:</label>
+                <input type="tel" id="telefono" name="telefono" required>
+            </div>
+            <div>
+                <label for="sucursal">Sucursal:</label>
+                <select id="sucursal" name="sucursal" required></select>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label for="medico">Médico o Profesional de la salud</label>
-          <select id="medico" name="medico" required>
-            <option value="">Seleccionar</option>
-          </select>
-        </div>
-      </div>
-
-      <div class="row">
-        <div class="form-group">
-          <label for="fecha">Fecha</label>
-          <input type="date" id="fecha" name="fecha" required>
+        <div class="form-row">
+            <div>
+                <label for="tipo">Tipo de atención:</label>
+                <select id="tipo" name="tipo" required></select>
+            </div>
+            <div>
+                <label for="medico">Médico o Profesional de la salud:</label>
+                <select id="medico" name="medico" required></select>
+            </div>
         </div>
 
-        <div class="form-group">
-          <label for="hora">Hora</label>
-          <select id="hora" name="hora" required>
-            <option value="">Seleccionar</option>
-          </select>
+        <div class="form-row">
+            <div>
+                <label for="fecha_hora">Fecha y hora:</label>
+                <select id="fecha_hora" name="fecha_hora" required></select>
+            </div>
+            <div>
+                <button type="submit" id="enviar" disabled>Agendar</button>
+            </div>
         </div>
-      </div>
-
-      <button type="submit" id="btn-agendar" disabled>Agendar Cita</button>
     </form>
-  </div>
-
-  <script>
-    function verificarCampos() {
-      const todosLlenos = [...document.querySelectorAll('#form-cita input, #form-cita select')]
-        .every(el => el.value.trim() !== '');
-      document.getElementById('btn-agendar').disabled = !todosLlenos;
-    }
-
-    document.querySelectorAll('#form-cita input, #form-cita select').forEach(el => {
-      el.addEventListener('input', verificarCampos);
-    });
-
-    $('#sucursal, #tipo').on('change', function () {
-      const sucursal = $('#sucursal').val();
-      const tipo = $('#tipo').val();
-      $('#medico').empty().append('<option value="">Cargando...</option>');
-
-      if (sucursal && tipo) {
-        $.get('/get_medicos', { sucursal, tipo }, function (data) {
-          $('#medico').empty().append('<option value="">Seleccionar</option>');
-          data.forEach(m => $('#medico').append(`<option value="${m}">${m}</option>`));
-        });
-      } else {
-        $('#medico').html('<option value="">Seleccionar</option>');
-      }
-    });
-
-    function cargarHorasDisponibles() {
-      const sucursal = $('#sucursal').val();
-      const medico = $('#medico').val();
-      const fecha = $('#fecha').val();
-      const selectHora = $('#hora');
-
-      if (!sucursal || !medico || !fecha) return;
-
-      $.get('/get_ocupados', { sucursal, medico, fecha }, function (ocupadas) {
-        const horas = [];
-        for (let h = 7; h <= 19; h++) {
-          horas.push(`${String(h).padStart(2, '0')}:00`);
-          horas.push(`${String(h).padStart(2, '0')}:30`);
-        }
-        horas.push("20:00");
-
-        selectHora.empty().append('<option value="">Seleccionar</option>');
-        horas.forEach(h => {
-          if (!ocupadas.includes(h)) {
-            selectHora.append(`<option value="${h}">${h}</option>`);
-          }
-        });
-      });
-    }
-
-    $('#fecha, #medico').on('change', cargarHorasDisponibles);
-  </script>
 </body>
 </html>
