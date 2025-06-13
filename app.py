@@ -119,3 +119,13 @@ if __name__ == '__main__':
     with app.app_context():
         db.create_all()
     app.run(debug=True)
+
+@app.route('/verificar_cita', methods=['POST'])
+def verificar_cita():
+    nombre = request.form.get('nombre')
+    medico = request.form.get('medico')
+    fecha_hora = request.form.get('fecha_hora')
+
+    cita_existente = Cita.query.filter_by(medico=medico, fecha_hora=fecha_hora).first()
+
+    return jsonify({'existe': cita_existente is not None})
